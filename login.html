@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Staff Login — Sikie's Homemade Bakery</title>
+<link rel="icon" href="images/logo.png">
+<link rel="stylesheet" href="css/style.css">
+<style>
+  .auth-wrapper {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: calc(100vh - 200px);
+    padding: 40px 20px;
+  }
+  .auth-card {
+    width: 100%;
+    max-width: 420px;
+    background: var(--paper);
+    border-radius: var(--radius-l);
+    border: 1px solid var(--line);
+    box-shadow: var(--shadow-lift);
+    padding: 40px;
+  }
+  .auth-card .eyebrow {
+    justify-content: center;
+    display: flex;
+    margin-bottom: 8px;
+  }
+  .auth-card h1 {
+    text-align: center;
+    margin-bottom: 8px;
+  }
+  .auth-card p {
+    text-align: center;
+    color: var(--espresso-soft);
+    font-size: 0.9rem;
+    margin-bottom: 30px;
+  }
+  .error-msg {
+    background: #fdecea;
+    color: var(--jam);
+    border: 1px solid #f5c6cb;
+    padding: 10px 14px;
+    border-radius: 10px;
+    font-size: 0.85rem;
+    font-weight: 600;
+    margin-bottom: 20px;
+    display: none;
+  }
+  .demo-note {
+    background: var(--cream-dim);
+    border: 1px dashed var(--toasted);
+    border-radius: 12px;
+    padding: 12px 16px;
+    font-size: 0.82rem;
+    color: var(--espresso-soft);
+    margin-top: 22px;
+    display: flex;
+    gap: 10px;
+    align-items: flex-start;
+  }
+  .demo-note svg { width: 18px; height: 18px; flex-shrink: 0; margin-top: 1px; color: var(--toasted-deep); }
+</style>
+</head>
+<body>
+
+<header class="site-header">
+  <nav class="nav container">
+    <a href="index.html" class="brand">
+      <img src="images/logo.png" alt="Sikie's Homemade Bakery logo">
+      <span class="brand-text"><strong>Sikie's</strong><span>Homemade Bakery</span></span>
+    </a>
+    <button class="nav-toggle" aria-label="Toggle navigation" aria-expanded="false"><span></span></button>
+    <ul class="nav-links">
+      <li><a href="index.html">Home</a></li>
+      <li><a href="about.html">About</a></li>
+      <li><a href="menu.html">Menu</a></li>
+      <li><a href="dashboard.html">Dashboard</a></li>
+      <li><a href="contact.html">Contact</a></li>
+    </ul>
+    <div class="nav-cta">
+      <a href="menu.html" class="btn btn-primary btn-sm">Order now</a>
+    </div>
+  </nav>
+</header>
+
+<main>
+  <div class="auth-wrapper">
+    <div class="auth-card">
+      <span class="eyebrow">staff only</span>
+      <h1>Admin Login</h1>
+      <p>Enter your staff access code to manage orders.</p>
+      
+      <div class="error-msg" id="login-error">Invalid access code. Please try again.</div>
+
+      <form id="login-form">
+        <div class="field">
+          <label for="access-code">Access Code</label>
+          <input type="password" id="access-code" placeholder="Enter staff code" required>
+        </div>
+        <button type="submit" class="btn btn-primary btn-block" style="margin-top: 10px;">Log in to Dashboard</button>
+      </form>
+      </div>
+    </div>
+  </div>
+</main>
+
+<script>
+  
+  const validCodes = ['sikie-admin', 'staff2026'];
+
+  document.getElementById('login-form').addEventListener('submit', function(e) {
+    e.preventDefault(); // Stop the page from reloading
+    
+    const code = document.getElementById('access-code').value.toLowerCase();
+    const errorMsg = document.getElementById('login-error');
+
+    if (validCodes.includes(code)) {
+      // Success! Redirect to dashboard
+      sessionStorage.setItem('isStaff', 'true'); // Store that they are logged in
+      window.location.href = 'dashboard.html';
+    } else {
+      // Show error message
+      errorMsg.style.display = 'block';
+    }
+  });
+</script>
+
+</body>
+</html>

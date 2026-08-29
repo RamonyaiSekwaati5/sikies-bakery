@@ -1,0 +1,351 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Menu — Sikie's Homemade Bakery</title>
+<link rel="icon" href="images/logo.png">
+<link rel="stylesheet" href="css/style.css">
+<style>
+  /* Menu Specific Styles */
+  .menu-item-img {
+    width: 80px;
+    height: 80px;
+    border-radius: 50%;
+    object-fit: cover;
+    flex-shrink: 0;
+    border: 3px solid var(--cream-dim);
+    background: var(--paper);
+  }
+  .menu-item {
+    display: flex;
+    gap: 16px;
+    align-items: center;
+    padding: 16px 20px;
+    background: var(--paper);
+    border-radius: var(--radius-m);
+    border: 1px solid rgba(0,0,0,0.05);
+    transition: all 0.2s;
+  }
+  .menu-item:hover {
+    border-color: var(--toasted);
+    box-shadow: var(--shadow-lift);
+  }
+  .menu-item-body {
+    flex: 1;
+  }
+  .menu-item-top {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+  .menu-item-top h4 {
+    margin: 0;
+    font-size: 1.05rem;
+  }
+  .menu-item-price {
+    font-weight: 700;
+    color: var(--jam);
+    font-family: var(--font-display);
+  }
+  .menu-item p {
+    margin: 4px 0 8px;
+    font-size: 0.85rem;
+    color: var(--espresso-soft);
+  }
+  .menu-item-foot {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-top: 4px;
+  }
+  .badge {
+    background: var(--cream-dim);
+    padding: 2px 12px;
+    border-radius: 20px;
+    font-size: 0.7rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    color: var(--espresso);
+  }
+  .pill-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-bottom: 28px;
+  }
+  .pill {
+    padding: 8px 20px;
+    border-radius: 30px;
+    border: 1px solid var(--espresso-soft);
+    background: transparent;
+    font-weight: 600;
+    font-size: 0.85rem;
+    cursor: pointer;
+    transition: all 0.2s;
+    color: var(--espresso);
+  }
+  .pill:hover {
+    background: var(--cream-dim);
+  }
+  .pill.active {
+    background: var(--toasted);
+    border-color: var(--toasted);
+    color: white;
+  }
+  .section-tight {
+    padding: 40px 20px;
+    max-width: 1180px;
+    margin: 0 auto;
+  }
+  .grid-2 {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+  }
+  @media (max-width: 680px) {
+    .grid-2 {
+      grid-template-columns: 1fr;
+    }
+    .menu-item-img {
+      width: 60px;
+      height: 60px;
+    }
+  }
+</style>
+</head>
+<body>
+
+<header class="site-header">
+  <nav class="nav container">
+    <a href="index.html" class="brand">
+      <img src="images/logo.png" alt="Sikie's Homemade Bakery logo">
+      <span class="brand-text"><strong>Sikie's</strong><span>Homemade Bakery</span></span>
+    </a>
+    <button class="nav-toggle" aria-label="Toggle navigation" aria-expanded="false"><span></span></button>
+    <ul class="nav-links">
+      <li><a href="index.html">Home</a></li>
+      <li><a href="about.html">About</a></li>
+      <li><a href="menu.html">Menu</a></li>
+      <li><a href="dashboard.html">Dashboard</a></li>
+      <li><a href="contact.html">Contact</a></li>
+    </ul>
+    <div class="nav-cta">
+      <a href="login.html" class="btn btn-ghost btn-sm">Log in</a>
+      <a href="menu.html" class="btn btn-primary btn-sm">Order now</a>
+    </div>
+  </nav>
+</header>
+
+<main>
+  <section class="page-hero container">
+    <span class="eyebrow">our menu</span>
+    <h1>Everything is baked to order</h1>
+  </section>
+
+  <section class="section-tight">
+    <div class="pill-row" role="tablist" aria-label="Filter menu by category">
+      <button class="pill active" data-filter="all">All</button>
+      <button class="pill" data-filter="Scones">Scones</button>
+      <button class="pill" data-filter="Muffins">Muffins</button>
+      <button class="pill" data-filter="Cakes">Cakes</button>
+      <button class="pill" data-filter="Lunch Box Cakes">Lunch Box Cakes</button>
+    </div>
+
+    <div class="grid-2">
+
+      <!-- Scones -->
+      <div class="menu-item" data-category="Scones">
+        <img src="images/plain-scones-5l - Copy.jpeg" alt="Plain Scones 5L" class="menu-item-img">
+        <div class="menu-item-body">
+          <div class="menu-item-top"><h4>Plain Scones (5L)</h4><span class="menu-item-price">R300</span></div>
+          <p>Freshly baked, buttery scones perfect with jam and cream.</p>
+          <div class="menu-item-foot">
+            <span class="badge">Scones</span>
+            <button class="btn btn-primary btn-sm" data-add data-id="Plain 5L" data-name="Plain Scones 5L" data-price="300">Add · R300</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="menu-item" data-category="Scones">
+        <img src="images/plain-scones-10l.jpeg" alt="Plain Scones 10L" class="menu-item-img">
+        <div class="menu-item-body">
+          <div class="menu-item-top"><h4>Plain Scones (10L)</h4><span class="menu-item-price">R550</span></div>
+          <p>Light and fluffy, baked fresh every morning.</p>
+          <div class="menu-item-foot">
+            <span class="badge">Scones</span>
+            <button class="btn btn-primary btn-sm" data-add data-id="Plain 10L" data-name="Plain Scones 10L" data-price="55">Add · R55</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="menu-item" data-category="Scones">
+        <img src="images/plain-scones-20l.jpeg" alt="Plain Scones 20L" class="menu-item-img">
+        <div class="menu-item-body">
+          <div class="menu-item-top"><h4>Plain Scones (20L)</h4><span class="menu-item-price">R1000</span></div>
+          <p>Best scones perfect for Sunday lunch or events.</p>
+          <div class="menu-item-foot">
+            <span class="badge">Scones</span>
+            <button class="btn btn-primary btn-sm" data-add data-id="Plain 20L" data-name="Plain Scones 20L" data-price="1000">Add · R1000</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Muffins -->
+      <div class="menu-item" data-category="Muffins">
+        <img src="images/blueberry-muffins-5l.jpeg" alt="Blueberry Muffins 5L" class="menu-item-img">
+        <div class="menu-item-body">
+          <div class="menu-item-top"><h4>Blueberry Muffins (5L)</h4><span class="menu-item-price">R350</span></div>
+          <p>Blueberry muffins boxed and ready for any celebration.</p>
+          <div class="menu-item-foot">
+            <span class="badge">Muffins</span>
+            <button class="btn btn-primary btn-sm" data-add data-id="Muffins 5L" data-name="Blueberry Muffins 5L" data-price="350">Add · R350</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Cakes -->
+      <div class="menu-item" data-category="Cakes">
+        <img src="images/bento-cake.jpeg" alt="Bento Cake" class="menu-item-img">
+        <div class="menu-item-body">
+          <div class="menu-item-top"><h4>Bento Cake</h4><span class="menu-item-price">R550</span></div>
+          <p>Cream-cheese frosted layers, rich cocoa sponge.</p>
+          <div class="menu-item-foot">
+            <span class="badge">Cakes</span>
+            <button class="btn btn-primary btn-sm" data-add data-id="bento" data-name="Bento Cake" data-price="550">Add · R550</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="menu-item" data-category="Cakes">
+        <img src="images/jam-tarts.jpeg" alt="Jam Tarts" class="menu-item-img">
+        <div class="menu-item-body">
+          <div class="menu-item-top"><h4>Biscoff &amp; Red Velvet Cake</h4><span class="menu-item-price">From R80</span></div>
+          <p>Designed with your flavours, colours, and toppers included.</p>
+          <div class="menu-item-foot">
+            <span class="badge">Cakes</span>
+            <button class="btn btn-primary btn-sm" data-add data-id="customcake" data-name="Custom Celebration Cake" data-price="450">Add · R450</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Lunch Box Cakes -->
+      <div class="menu-item" data-category="Lunch Box Cakes">
+        <img src="images/lunch-box-cakes.jpeg" alt="Lunch Box Cakes" class="menu-item-img">
+        <div class="menu-item-body">
+          <div class="menu-item-top"><h4>Cakes in Cups</h4><span class="menu-item-price">R45</span></div>
+          <p>Individual cakes in cups — perfect for parties.</p>
+          <div class="menu-item-foot">
+            <span class="badge">Lunch Box Cakes</span>
+            <button class="btn btn-primary btn-sm" data-add data-id="lunchboxcakes" data-name="Lunch Box Cakes" data-price="45">Add · R45</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="menu-item" data-category="Lunch Box Cakes">
+        <img src="images/mini-lunch-boxes.jpeg" alt="Mini Lunch Boxes" class="menu-item-img">
+        <div class="menu-item-body">
+          <div class="menu-item-top"><h4>Mini Lunch Boxes</h4><span class="menu-item-price">R60</span></div>
+          <p>Golden, fluffy, and best filled with chocolate or syrup.</p>
+          <div class="menu-item-foot">
+            <span class="badge">Lunch Box Cakes</span>
+            <button class="btn btn-primary btn-sm" data-add data-id="minilunchboxes" data-name="Mini Lunch Boxes" data-price="60">Add · R60</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="menu-item" data-category="Lunch Box Cakes">
+        <img src="images/medium-lunch-box.jpeg" alt="Medium Lunch Box" class="menu-item-img">
+        <div class="menu-item-body">
+          <div class="menu-item-top"><h4>Medium Lunch Box</h4><span class="menu-item-price">R120</span></div>
+          <p>Creamy cinnamon-dusted custard tart in a crisp pastry shell.</p>
+          <div class="menu-item-foot">
+            <span class="badge">Lunch Box Cakes</span>
+            <button class="btn btn-primary btn-sm" data-add data-id="mediumlunchbox" data-name="Medium Lunch Box" data-price="120">Add · R120</button>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+  <section class="section container">
+    <div class="card reveal" style="text-align:center; padding:48px 32px;">
+      <h2>Need something not on the list?</h2>
+      <p style="color:var(--espresso-soft); max-width:480px; margin:0 auto 24px;">Sikie takes custom orders for weddings, birthdays and events. Tell us what you're dreaming of.</p>
+      <a href="contact.html" class="btn btn-jam">Request a custom order</a>
+    </div>
+  </section>
+</main>
+
+<footer class="site-footer">
+  <div class="container">
+    <div class="footer-grid">
+      <div>
+        <div class="footer-brand">
+          <img src="images/logo.png" alt="Sikie's logo">
+          <strong>Sikie's Homemade Bakery</strong>
+        </div>
+        <p style="font-size:.9rem;">Small-batch Scones, Cakes, Muffins and South African favourites, baked to order in Quigney.</p>
+      </div>
+      <div>
+        <h4>Explore</h4>
+        <ul>
+          <li><a href="about.html">About us</a></li>
+          <li><a href="menu.html">Menu</a></li>
+          <li><a href="dashboard.html">Dashboard</a></li>
+          <li><a href="login.html">Log in</a></li>
+        </ul>
+      </div>
+      <div>
+        <h4>Contact</h4>
+        <ul>
+          <li>078 923 7402</li>
+          <li>hello@sikies-bakery.co.za</li>
+          <li>East London, Eastern Cape</li>
+        </ul>
+      </div>
+      <div>
+        <h4>Stay updated</h4>
+        <form id="newsletter-form" style="display:flex; gap:8px;">
+          <input type="email" required placeholder="Your email" style="flex:1; padding:10px 12px; border-radius:10px; border:1px solid rgba(251,242,228,0.2); background:rgba(251,242,228,0.08); color:var(--cream);">
+          <button class="btn btn-primary btn-sm" type="submit">Join</button>
+        </form>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <span>© 2026 Sikie's Homemade Bakery.</span>
+      <span>Built with HTML, CSS &amp; JavaScript only.</span>
+    </div>
+  </div>
+</footer>
+
+<!-- Cart drawer -->
+<div class="overlay"></div>
+<button class="cart-fab" aria-label="Open basket">
+  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/><path d="M1 1h4l2.7 13.4a2 2 0 0 0 2 1.6h9.7a2 2 0 0 0 2-1.6L23 6H6"/></svg>
+  <span class="cart-count">0</span>
+</button>
+<aside class="cart-drawer">
+  <div class="cart-drawer-head">
+    <h3>Your basket</h3>
+    <button class="cart-close" aria-label="Close basket">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 6 6 18M6 6l12 12"/></svg>
+    </button>
+  </div>
+  <div class="cart-items"><p class="cart-empty">Your basket is empty.<br>Add something warm from the menu ✨</p></div>
+  <div class="cart-drawer-foot">
+    <div class="cart-total"><span>Total</span><span class="cart-total-value">R0.00</span></div>
+    <button class="btn btn-jam btn-block cart-checkout">Place order</button>
+    <p class="form-hint" style="margin-top:10px; text-align:center;">No payment is processed.</p>
+  </div>
+</aside>
+
+<script src="js/script.js"></script>
+</body>
+</html>
