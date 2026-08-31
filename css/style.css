@@ -767,3 +767,54 @@ tbody tr:hover{ background: rgba(228,169,48,0.08); }
 .page-hero .eyebrow{ justify-content:center; }
 .page-hero h1{ font-size: clamp(2.1rem, 4vw, 3rem); }
 .page-hero p{ max-width:560px; margin:0 auto; color: var(--espresso-soft); }
+/* Cart item controls */
+.cart-controls {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    margin: 4px 0;
+}
+
+.cart-controls button {
+    width: 28px;
+    height: 28px;
+    border: 1px solid #ddd;
+    background: white;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 16px;
+    font-weight: bold;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.15s;
+}
+
+.cart-controls button:hover {
+    background: #f0f0f0;
+}
+
+.cart-controls .cart-minus {
+    color: #e74c3c;
+}
+
+.cart-controls .cart-plus {
+    color: #2d7a3d;
+}
+
+.cart-controls .cart-remove-btn {
+    background: #fee;
+    color: #e74c3c;
+    border: none;
+    margin-left: 4px;
+}
+
+.cart-controls .cart-remove-btn:hover {
+    background: #fdd;
+}
+
+.cart-controls span {
+    min-width: 24px;
+    text-align: center;
+    font-weight: 600;
+}
