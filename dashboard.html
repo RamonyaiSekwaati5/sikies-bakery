@@ -6,46 +6,18 @@
 <title>Dashboard — Sikie's Homemade Bakery</title>
 <link rel="icon" href="images/logo.png">
 <link rel="stylesheet" href="css/style.css">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script>
-  // Redirect to login if not logged in
-  if (!sessionStorage.getItem('isStaff')) {
-    window.location.href = 'login.html';
-  }
+  if (!sessionStorage.getItem('isStaff')) { window.location.href = 'login.html'; }
 </script>
 <style>
-  /* Force clean layout: no hidden giant elements or overflowing circles */
-  .dash-main, .dash-shell, .card, .menu-item {
-    overflow: hidden; 
-  }
-  .dash-main, .dash-shell {
-    position: relative;
-    z-index: 1;
-  }
+  .dash-main, .dash-shell, .card, .menu-item { overflow: hidden; }
+  .dash-main, .dash-shell { position: relative; z-index: 1; }
   
-  /* Inventory Alerts */
-  .inventory-alert {
-    background: #FDE3C3;
-    border: 1px solid #F5B971;
-    color: #8B4A1D;
-    padding: 14px 18px;
-    border-radius: var(--radius-m);
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    margin-bottom: 24px;
-    font-weight: 600;
-    font-size: 0.95rem;
-  }
+  .inventory-alert { background: #FDE3C3; border: 1px solid #F5B971; color: #8B4A1D; padding: 14px 18px; border-radius: var(--radius-m); display: flex; align-items: center; gap: 12px; margin-bottom: 24px; font-weight: 600; font-size: 0.95rem; }
   .inventory-alert svg { width: 22px; height: 22px; flex-shrink: 0; }
   
-  .stock-badge {
-    padding: 4px 12px;
-    border-radius: 999px;
-    font-size: 0.72rem;
-    font-weight: 800;
-    text-transform: uppercase;
-    letter-spacing: 0.04em;
-  }
+  .stock-badge { padding: 4px 12px; border-radius: 999px; font-size: 0.72rem; font-weight: 800; text-transform: uppercase; letter-spacing: 0.04em; }
   .stock-in { background: #DEF2E1; color: #28793E; }
   .stock-low { background: #FCEBD5; color: #8B4A1D; }
   .stock-out { background: #FDEAEA; color: #B42318; }
@@ -78,23 +50,20 @@
   <aside class="dash-side">
     <div class="dash-user">
       <div class="dash-avatar">S</div>
-      <div>
-        <strong>Sisikelelo F.</strong>
-        <span>skmfikoy@gmail.com</span>
-      </div>
+      <div><strong>Sisikelelo F.</strong><span>skmfikoy@gmail.com</span></div>
     </div>
     <nav class="dash-nav">
-      <a href="#" class="active" data-dash-tab="overview">
+      <a href="#" data-dash-tab="overview" class="active">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg>
         Overview
       </a>
       <a href="#" data-dash-tab="orders">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4Z"/><path d="M3 6h18M16 10a4 4 0 0 1-8 0"/></svg>
-        My orders
+        Process Orders
       </a>
-      <a href="#" data-dash-tab="favourites">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20.8 4.6a5.5 5.5 0 0 0-7.8 0L12 5.7l-1-1a5.5 5.5 0 1 0-7.8 7.8l1 1L12 21l7.8-7.5 1-1a5.5 5.5 0 0 0 0-7.9Z"/></svg>
-        Favourites
+      <a href="#" data-dash-tab="add-product">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 8v8M8 12h8"/></svg>
+        Add Product
       </a>
       <a href="#" data-dash-tab="profile">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="8" r="4"/><path d="M4 21c1.5-4.5 5-6 8-6s6.5 1.5 8 6"/></svg>
@@ -104,28 +73,25 @@
   </aside>
 
   <section class="dash-main">
-
-    <!-- OVERVIEW PANEL -->
+    <!-- OVERVIEW -->
     <div data-dash-panel="overview">
       <div class="dash-topbar">
         <div>
           <h2 style="margin-bottom:2px;">Welcome back, sikie👋</h2>
-          <p style="margin:0; color:var(--espresso-soft);">Here's what's happening with your bakery account.</p>
+          <p style="margin:0; color:var(--espresso-soft);">Here's what's happening.</p>
         </div>
-        <a href="menu.html" class="btn btn-primary btn-sm">Place a new order</a>
       </div>
 
-      <!-- INVENTORY ALERT -->
       <div class="inventory-alert" id="inventory-alert" style="display: none;">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10.29 3.86 1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
-        <span id="alert-text">You have items running low on stock. Please reorder soon.</span>
+        <span id="alert-text">Low stock alert.</span>
       </div>
 
       <div class="stat-row">
         <div class="stat-card">
           <span>Total orders</span>
-          <strong>14</strong>
-          <em>+2 this month</em>
+          <strong id="total-orders">0</strong>
+          <em>Awaiting processing</em>
         </div>
         <div class="stat-card">
           <span>Loyalty points</span>
@@ -144,106 +110,63 @@
         </div>
       </div>
 
-      <!-- INVENTORY TABLE -->
       <h3 style="margin-bottom:14px;">Current Inventory</h3>
       <div class="table-wrap" style="margin-bottom: 30px;">
-        <table id="inventory-table">
-          <thead><tr><th>Product</th><th>Category</th><th>Stock Left</th><th>Status</th></tr></thead>
-          <tbody>
-            <!-- Data will be inserted here by JavaScript -->
-          </tbody>
-        </table>
-      </div>
-
-      <h3 style="margin-bottom:14px;">Recent orders</h3>
-      <div class="table-wrap">
         <table>
-          <thead><tr><th>Order</th><th>Items</th><th>Status</th><th>Progress</th><th></th></tr></thead>
-          <tbody>
-            <tr>
-              <td>#SK-1042</td>
-              <td>Bento-cake ×2</td>
-              <td><span class="status-pill status-preparing">Preparing</span></td>
-              <td style="width:160px;"><div class="progress-track"><div class="progress-fill" style="width:25%"></div></div></td>
-              <td><button class="btn btn-ghost btn-sm" data-advance-order>Advance</button></td>
-            </tr>
-            <tr>
-              <td>#SK-1038</td>
-              <td>Muffins ×6</td>
-              <td><span class="status-pill status-baking">Baking</span></td>
-              <td style="width:160px;"><div class="progress-track"><div class="progress-fill" style="width:55%"></div></div></td>
-              <td><button class="btn btn-ghost btn-sm" data-advance-order>Advance</button></td>
-            </tr>
-            <tr>
-              <td>#SK-1031</td>
-              <td>Jam Tart ×1</td>
-              <td><span class="status-pill status-ready">Ready for pickup</span></td>
-              <td style="width:160px;"><div class="progress-track"><div class="progress-fill" style="width:85%"></div></div></td>
-              <td><button class="btn btn-ghost btn-sm" data-advance-order>Advance</button></td>
-            </tr>
-            <tr>
-              <td>#SK-1020</td>
-              <td>Medium Lunch Box ×6</td>
-              <td><span class="status-pill status-delivered">Delivered</span></td>
-              <td style="width:160px;"><div class="progress-track"><div class="progress-fill" style="width:100%"></div></div></td>
-              <td><button class="btn btn-ghost btn-sm" data-advance-order disabled>Completed</button></td>
-            </tr>
-          </tbody>
+          <thead><tr><th>Product</th><th>Category</th><th>Stock Left</th><th>Status</th></tr></thead>
+          <tbody id="inventory-table"></tbody>
         </table>
       </div>
-      <p class="form-hint" style="margin-top:14px;">Click "Advance" to see how order status updates would move through the kitchen — this is simulated for the demo.</p>
     </div>
 
-    <!-- ORDERS PANEL -->
+    <!-- ORDERS -->
     <div data-dash-panel="orders" style="display:none;">
-      <h2>Order history</h2>
-      <p style="color:var(--espresso-soft);">A full list of past orders would appear here, filterable by date and status.</p>
-      <div class="grid grid-3" style="margin-top:24px;">
-        <div class="card">
-          <span class="badge">Delivered · 2 Aug</span>
-          <h3 style="margin-top:10px;">#SK-1020</h3>
-          <p>blueberry muffins ×6 — R120.00</p>
-        </div>
-        <div class="card">
-          <span class="badge">Delivered · 26 Jul</span>
-          <h3 style="margin-top:10px;">#SK-1015</h3>
-          <p>Bento-cake ×3 — R195.00</p>
-        </div>
-        <div class="card">
-          <span class="badge">Delivered · 14 Jul</span>
-          <h3 style="margin-top:10px;">#SK-1006</h3>
-          <p>Jam Tart ×1 — R150.00</p>
-        </div>
+      <h2>Process Orders</h2>
+      <p style="color:var(--espresso-soft);">All customer orders.</p>
+      <div class="table-wrap" style="margin-top:24px;">
+        <table>
+          <thead><tr><th>Customer</th><th>Phone</th><th>Address</th><th>Items</th><th>Total</th><th>Status</th><th>Action</th></tr></thead>
+          <tbody id="orders-tbody"></tbody>
+        </table>
       </div>
     </div>
 
-    <!-- FAVOURITES PANEL (CLEANED UP - NO IMAGES) -->
-    <div data-dash-panel="favourites" style="display:none;">
-      <h2>Your favourites</h2>
-      <p style="color:var(--espresso-soft);">Quick-reorder the things you come back for.</p>
-      <div class="grid grid-3" style="margin-top:24px;">
-        <div class="card">
-          <span class="badge">Most ordered</span>
-          <h3 style="margin-top:10px;">Medium Lunch Box</h3>
-          <p>R65.00</p>
-          <a href="menu.html" class="btn btn-primary btn-sm" style="margin-top:10px;">Reorder</a>
-        </div>
-        <div class="card">
-          <span class="badge">Favourite</span>
-          <h3 style="margin-top:10px;">Bento-cake</h3>
-          <p>R90.00</p>
-          <a href="menu.html" class="btn btn-primary btn-sm" style="margin-top:10px;">Reorder</a>
-        </div>
-        <div class="card">
-          <span class="badge">Sweet treat</span>
-          <h3 style="margin-top:10px;">Blueberry Muffins</h3>
-          <p>R120.00</p>
-          <a href="menu.html" class="btn btn-primary btn-sm" style="margin-top:10px;">Reorder</a>
-        </div>
+    <!-- ADD PRODUCT -->
+    <div data-dash-panel="add-product" style="display:none;">
+      <h2>Add New Product</h2>
+      <div class="form-card" style="max-width:600px; margin-top:20px;">
+        <form id="add-product-form">
+          <div class="field">
+            <label for="prod-name">Product Name</label>
+            <input type="text" id="prod-name" placeholder="e.g. Chocolate Brownies" required>
+          </div>
+          <div class="field-row">
+            <div class="field">
+              <label for="prod-price">Price (R)</label>
+              <input type="number" id="prod-price" placeholder="e.g. 85" min="1" step="0.01" required>
+            </div>
+            <div class="field">
+              <label for="prod-category">Category</label>
+              <select id="prod-category" required>
+                <option value="">Select</option>
+                <option value="Scones">Scones</option>
+                <option value="Muffins">Muffins</option>
+                <option value="Cakes">Cakes</option>
+                <option value="Lunch Box Cakes">Lunch Box Cakes</option>
+                <option value="Custom">Custom</option>
+              </select>
+            </div>
+          </div>
+          <div class="field">
+            <label for="prod-desc">Description</label>
+            <textarea id="prod-desc" rows="3" placeholder="Tell customers what makes it special..." required></textarea>
+          </div>
+          <button type="submit" class="btn btn-primary" style="margin-top:10px;">Add Product to Menu</button>
+        </form>
       </div>
     </div>
 
-    <!-- PROFILE PANEL -->
+    <!-- PROFILE -->
     <div data-dash-panel="profile" style="display:none;">
       <h2>Profile settings</h2>
       <div class="form-card" style="max-width:560px; margin-top:20px;">
@@ -253,70 +176,144 @@
         </div>
         <div class="field"><label>Email</label><input type="email" value="skmfiyoki@gmail.com"></div>
         <div class="field"><label>Delivery address</label><input type="text" value="33 Tennyson street quigney , East London"></div>
-        <button class="btn btn-primary" type="button" onclick="showToast('Profile changes saved (demo only)')">Save changes</button>
+        <button class="btn btn-primary" type="button" onclick="window.location.href='login.html'">Save changes</button>
+        
+        <div style="margin-top: 20px; border-top: 1px solid var(--line); padding-top: 20px;">
+          <button class="btn btn-ghost" type="button" onclick="window.location.href='login.html'">Sign Out</button>
+        </div>
       </div>
     </div>
-
   </section>
 </main>
 
-<script src="js/script.js"></script>
 <script>
-  // INVENTORY LOGIC
-  // You can change these numbers to test the alerts!
-  const inventory = [
-    { name: 'Plain Scones (5L)', category: 'Scones', stock: 14, threshold: 5 },
-    { name: 'Plain Scones (10L)', category: 'Scones', stock: 2, threshold: 5 }, // LOW STOCK
-    { name: 'Blueberry Muffins', category: 'Muffins', stock: 22, threshold: 5 },
-    { name: 'Bento Cake', category: 'Cakes', stock: 0, threshold: 5 }, // OUT OF STOCK
-    { name: 'Jam Tarts', category: 'Cakes', stock: 8, threshold: 5 },
-    { name: 'Lunch Box Cakes', category: 'Lunch Box', stock: 3, threshold: 5 }, // LOW STOCK
-    { name: 'Medium Lunch Box', category: 'Lunch Box', stock: 15, threshold: 5 },
-  ];
+  const supabase = window.supabase.createClient(
+    'https://kxqdmrjftsanaqldje.supabase.co',
+    'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imt4cWRtcmlmanRzYW5hcWxqZGplIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODgxODQ3NTYsImV4cCI6MjEwMzc2MDc1Nn0.PLlVCN7TxSgPkOTllVdjj2Quv_bmpL6j88QOHHvTmn8'
+  );
 
-  function renderInventory() {
-    const tableBody = document.querySelector('#inventory-table tbody');
+  function showToast(message) {
+    let toast = document.querySelector('.toast');
+    if (!toast) {
+      toast = document.createElement('div');
+      toast.className = 'toast';
+      toast.innerHTML = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 6 9 17l-5-5"/></svg><span></span>`;
+      document.body.appendChild(toast);
+    }
+    toast.querySelector('span').textContent = message;
+    toast.classList.add('show');
+    clearTimeout(showToast._t);
+    showToast._t = setTimeout(() => toast.classList.remove('show'), 2800);
+  }
+  window.showToast = showToast;
+
+  document.addEventListener('DOMContentLoaded', function() {
+    const tabs = document.querySelectorAll('[data-dash-tab]');
+    const panels = document.querySelectorAll('[data-dash-panel]');
+    
+    tabs.forEach(tab => {
+      tab.addEventListener('click', function(e) {
+        e.preventDefault();
+        tabs.forEach(t => t.classList.remove('active'));
+        this.classList.add('active');
+        const target = this.dataset.dashTab;
+        panels.forEach(p => {
+          if (p.dataset.dashPanel === target) { p.style.display = 'block'; }
+          else { p.style.display = 'none'; }
+        });
+      });
+    });
+
+    const inventory = [
+      { name: 'Plain Scones (5L)', category: 'Scones', stock: 14, threshold: 5 },
+      { name: 'Plain Scones (10L)', category: 'Scones', stock: 2, threshold: 5 },
+      { name: 'Blueberry Muffins', category: 'Muffins', stock: 22, threshold: 5 },
+      { name: 'Bento Cake', category: 'Cakes', stock: 0, threshold: 5 },
+      { name: 'Jam Tarts', category: 'Cakes', stock: 8, threshold: 5 },
+      { name: 'Lunch Box Cakes', category: 'Lunch Box', stock: 3, threshold: 5 },
+      { name: 'Medium Lunch Box', category: 'Lunch Box', stock: 15, threshold: 5 },
+    ];
+
+    const tableBody = document.getElementById('inventory-table');
     const alertBox = document.getElementById('inventory-alert');
-    const alertText = document.getElementById('alert-text');
     let lowStockCount = 0;
-
     tableBody.innerHTML = '';
 
     inventory.forEach(item => {
       let statusClass = 'stock-in';
       let statusText = 'In Stock';
+      if (item.stock === 0) { statusClass = 'stock-out'; statusText = 'Out of Stock'; lowStockCount++; }
+      else if (item.stock <= item.threshold) { statusClass = 'stock-low'; statusText = 'Low Stock'; lowStockCount++; }
 
-      if (item.stock === 0) {
-        statusClass = 'stock-out';
-        statusText = 'Out of Stock';
-        lowStockCount++;
-      } else if (item.stock <= item.threshold) {
-        statusClass = 'stock-low';
-        statusText = 'Low Stock';
-        lowStockCount++;
-      }
-
-      const row = `
-        <tr>
-          <td>${item.name}</td>
-          <td>${item.category}</td>
-          <td>${item.stock} left</td>
-          <td><span class="stock-badge ${statusClass}">${statusText}</span></td>
-        </tr>
-      `;
-      tableBody.innerHTML += row;
+      tableBody.innerHTML += `<tr><td>${item.name}</td><td>${item.category}</td><td>${item.stock} left</td><td><span class="stock-badge ${statusClass}">${statusText}</span></td></tr>`;
     });
 
     if (lowStockCount > 0) {
       alertBox.style.display = 'flex';
-      alertText.textContent = `Warning: You have ${lowStockCount} item(s) running low or out of stock. Please reorder soon.`;
-    } else {
-      alertBox.style.display = 'none';
+      document.getElementById('alert-text').textContent = `Warning: You have ${lowStockCount} item(s) running low.`;
     }
+
+    loadOrders();
+  });
+
+  async function loadOrders() {
+    const { data: orders, error } = await supabase.from('orders').select('*').order('created_at', { ascending: false });
+    const ordersTbody = document.getElementById('orders-tbody');
+    const totalOrdersEl = document.getElementById('total-orders');
+
+    if (error) { console.error(error); return; }
+    totalOrdersEl.textContent = orders.length;
+
+    if (orders.length === 0) {
+      ordersTbody.innerHTML = `<tr><td colspan="7" style="text-align: center; color: var(--espresso-soft); padding: 30px;">No orders yet.</td></tr>`;
+      return;
+    }
+
+    ordersTbody.innerHTML = '';
+    orders.forEach(order => {
+      let itemsList = '';
+      if (Array.isArray(order.items)) { order.items.forEach(item => { itemsList += `${item.name} × ${item.qty}<br>`; }); }
+
+      ordersTbody.innerHTML += `
+        <tr>
+          <td><strong>${order.customer_name}</strong></td>
+          <td>${order.phone}</td>
+          <td>${order.address}</td>
+          <td>${itemsList}</td>
+          <td><strong>R${order.total.toFixed(2)}</strong></td>
+          <td><span class="status-pill status-preparing">${order.status || 'New'}</span></td>
+          <td><button class="btn btn-primary btn-sm" onclick="processOrder(this, '${order.id}')">Process</button></td>
+        </tr>`;
+    });
   }
 
-  // Run inventory check when page loads
-  document.addEventListener('DOMContentLoaded', renderInventory);
+  async function processOrder(button, orderId) {
+    const row = button.closest('tr');
+    const statusCell = row.querySelector('.status-pill');
+    statusCell.classList.remove('status-preparing');
+    statusCell.classList.add('status-baking');
+    statusCell.textContent = 'Baking';
+    button.disabled = true;
+    button.textContent = 'Processing...';
+
+    const { error } = await supabase.from('orders').update({ status: 'Baking' }).eq('id', orderId);
+    if (error) { console.error(error); }
+    showToast('Order moved to Baking status');
+  }
+
+  document.getElementById('add-product-form').addEventListener('submit', function(e) {
+    e.preventDefault();
+    const name = document.getElementById('prod-name').value;
+    const price = parseFloat(document.getElementById('prod-price').value);
+    const category = document.getElementById('prod-category').value;
+    const description = document.getElementById('prod-desc').value;
+
+    let products = JSON.parse(localStorage.getItem('sikies_products')) || [];
+    products.push({ name, price, category, description, image: null });
+    localStorage.setItem('sikies_products', JSON.stringify(products));
+    this.reset();
+    showToast(`${name} added to Menu successfully!`);
+  });
 </script>
 </body>
 </html>
