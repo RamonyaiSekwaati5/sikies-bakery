@@ -1,5 +1,5 @@
 /* =========================================================
-   Sikie's Homemade Bakery — Front-end interactivity
+   Sikie's Homemade Bakery — Shared front-end interactivity
    ========================================================= */
 
 /* ---------- Mobile nav ---------- */
@@ -12,6 +12,26 @@
     toggle.setAttribute('aria-expanded', links.classList.contains('open'));
   });
   links.querySelectorAll('a').forEach(a => a.addEventListener('click', () => links.classList.remove('open')));
+})();
+
+/* ---------- Scroll reveal ---------- */
+(function initReveal(){
+  const items = document.querySelectorAll('.reveal');
+  if(!items.length || typeof IntersectionObserver === 'undefined') return;
+  try{
+    const io = new IntersectionObserver((entries) => {
+      entries.forEach(e => {
+        if(e.isIntersecting){ e.target.classList.add('in'); e.target.classList.remove('pre'); io.unobserve(e.target); }
+      });
+    }, { threshold: 0.15 });
+    items.forEach(el => {
+      el.classList.add('pre');
+      io.observe(el);
+      setTimeout(() => el.classList.add('in'), 2500);
+    });
+  } catch(err){
+    items.forEach(el => el.classList.add('in'));
+  }
 })();
 
 /* ---------- Toast helper ---------- */
@@ -46,6 +66,7 @@ const BakeryCart = (function(){
     save();
     render();
   }
+  
   function remove(id){
     if(!items[id]) return;
     items[id].qty -= 1;
@@ -53,15 +74,23 @@ const BakeryCart = (function(){
     save();
     render();
   }
+  
   function count(){
     return Object.values(items).reduce((s,i) => s + i.qty, 0);
   }
+  
   function total(){
     return Object.values(items).reduce((s,i) => s + i.qty * i.price, 0);
   }
+  
   function render(){
     const countEls = document.querySelectorAll('.cart-count');
     countEls.forEach(el => el.textContent = count());
+
+    document.querySelectorAll('.qty-display').forEach(el => {
+      const id = el.dataset.id;
+      el.textContent = items[id] ? items[id].qty : 0;
+    });
 
     const list = document.querySelector('.cart-items');
     if(list){
@@ -73,11 +102,50 @@ const BakeryCart = (function(){
           <div class="cart-line">
             <div>
               <strong>${item.name}</strong>
-              <span>R${item.price.toFixed(2)} × ${item.qty}</span>
+              <div class="cart-controls">
+                <button class="cart-minus" data-id="${id}">−</button>
+                <span>${item.qty}</span>
+                <button class="cart-plus" data-id="${id}">+</button>
+                <button class="cart-remove-btn" data-id="${id}">✕</button>
+              </div>
+              <span class="cart-price-each">R${item.price.toFixed(2)} each</span>
             </div>
-            <strong>R${(item.price * item.qty).toFixed(2)}</strong>
+            <strong class="cart-item-total">R${(item.price * item.qty).toFixed(2)}</strong>
           </div>
         `).join('');
+
+        // Attach events to the new buttons
+        list.querySelectorAll('.cart-plus').forEach(btn => {
+          btn.onclick = () => {
+            const id = btn.dataset.id;
+            if(items[id]) {
+              items[id].qty += 1;
+              save();
+              render();
+            }
+          };
+        });
+
+        list.querySelectorAll('.cart-minus').forEach(btn => {
+          btn.onclick = () => {
+            const id = btn.dataset.id;
+            if(items[id]) {
+              items[id].qty -= 1;
+              if(items[id].qty <= 0) delete items[id];
+              save();
+              render();
+            }
+          };
+        });
+
+        list.querySelectorAll('.cart-remove-btn').forEach(btn => {
+          btn.onclick = () => {
+            const id = btn.dataset.id;
+            delete items[id];
+            save();
+            render();
+          };
+        });
       }
     }
     const totalEl = document.querySelector('.cart-total-value');
@@ -88,7 +156,7 @@ const BakeryCart = (function(){
 })();
 window.BakeryCart = BakeryCart;
 
-/* ---------- Menu buttons ---------- */
+/* ---------- Menu item quantity buttons ---------- */
 (function initMenuButtons(){
   document.querySelectorAll('[data-add]').forEach(btn => {
     btn.addEventListener('click', () => {
@@ -96,6 +164,9 @@ window.BakeryCart = BakeryCart;
       BakeryCart.add(id, name, parseFloat(price));
       showToast(`Added ${name} to your basket`);
     });
+  });
+  document.querySelectorAll('[data-remove]').forEach(btn => {
+    btn.addEventListener('click', () => BakeryCart.remove(btn.dataset.id));
   });
   BakeryCart.render();
 })();
@@ -144,17 +215,55 @@ window.BakeryCart = BakeryCart;
     const errorBox = document.querySelector('#login-error');
     const btn = form.querySelector('button[type="submit"]');
 
-    if(email.value.trim().toLowerCase() === DEMO_USER.email && password.value === DEMO_USER.password){
-      sessionStorage.setItem('isStaff', 'true');
-      btn.textContent = 'Success — redirecting…';
-      setTimeout(() => { window.location.href = 'dashboard.html'; }, 500);
-    } else {
-      errorBox.style.display = 'flex';
+    if(!email.value.trim() || !password.value.trim()){
+      return;
     }
+
+    btn.disabled = true;
+    const originalText = btn.textContent;
+    btn.textContent = 'Signing in…';
+    errorBox.style.display = 'none';
+
+    setTimeout(() => {
+      if(email.value.trim().toLowerCase() === DEMO_USER.email && password.value === DEMO_USER.password){
+        sessionStorage.setItem('isStaff', 'true');
+        btn.textContent = 'Success — redirecting…';
+        setTimeout(() => { window.location.href = 'dashboard.html'; }, 500);
+      } else {
+        errorBox.style.display = 'flex';
+        btn.disabled = false;
+        btn.textContent = originalText;
+      }
+    }, 700);
   });
 })();
 
-/* ---------- Menu filter ---------- */
+/* =========================================================
+   CONTACT FORM
+   ========================================================= */
+(function initContactForm(){
+  const form = document.querySelector('#contact-form');
+  if(!form) return;
+
+  form.addEventListener('submit', (e) => {
+    e.preventDefault();
+    const btn = form.querySelector('button[type="submit"]');
+    const original = btn.textContent;
+    btn.disabled = true;
+    btn.textContent = 'Sending…';
+
+    setTimeout(() => {
+      btn.textContent = 'Message sent ✓';
+      showToast('Thanks! Sikie will reply to your message shortly.');
+      form.reset();
+      setTimeout(() => { btn.disabled = false; btn.textContent = original; }, 1800);
+    }, 800);
+  });
+})();
+
+/* =========================================================
+   MENU FILTER
+   ========================================================= */
 (function initMenuFilter(){
   const pills = document.querySelectorAll('[data-filter]');
   const items = document.querySelectorAll('[data-category]');
@@ -170,5 +279,27 @@ window.BakeryCart = BakeryCart;
         item.style.display = show ? '' : 'none';
       });
     });
+  });
+})();
+
+/* ---------- Newsletter ---------- */
+(function initNewsletter(){
+  const form = document.querySelector('#newsletter-form');
+  if(!form) return;
+  form.addEventListener('submit', (e) => {
+    e.preventDefault();
+    const input = form.querySelector('input');
+    if(!input.value.trim()){ return; }
+    showToast('Subscribed! Fresh bread news is on its way 🌾');
+    form.reset();
+  });
+})();
+
+/* ---------- Set active nav link ---------- */
+(function markActiveNav(){
+  const path = window.location.pathname.split('/').pop() || 'index.html';
+  document.querySelectorAll('.nav-links a').forEach(a => {
+    const href = a.getAttribute('href');
+    if(href === path) a.classList.add('active');
   });
 })();
