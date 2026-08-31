@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Checkout — Sikie's Homemade Bakery</title>
+<link rel="icon" href="images/logo.png">
+<link rel="stylesheet" href="css/style.css">
+<style>
+  .checkout-wrapper {
+    max-width: 900px;
+    margin: 40px auto;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 30px;
+  }
+  @media (max-width: 768px) {
+    .checkout-wrapper { grid-template-columns: 1fr; }
+  }
+  .order-summary {
+    background: var(--paper);
+    border: 1px solid var(--line);
+    border-radius: var(--radius-m);
+    padding: 24px;
+    height: fit-content;
+  }
+  .order-line {
+    display: flex;
+    justify-content: space-between;
+    padding: 10px 0;
+    border-bottom: 1px dashed var(--line);
+    font-size: 0.9rem;
+  }
+</style>
+</head>
+<body>
+
+<header class="site-header">
+  <nav class="nav container">
+    <a href="index.html" class="brand">
+      <img src="images/logo.png" alt="Sikie's Homemade Bakery logo">
+      <span class="brand-text"><strong>Sikie's</strong><span>Homemade Bakery</span></span>
+    </a>
+    <button class="nav-toggle" aria-label="Toggle navigation" aria-expanded="false"><span></span></button>
+    <ul class="nav-links">
+      <li><a href="index.html">Home</a></li>
+      <li><a href="about.html">About</a></li>
+      <li><a href="menu.html">Menu</a></li>
+      <li><a href="dashboard.html">Dashboard</a></li>
+      <li><a href="contact.html">Contact</a></li>
+    </ul>
+    <div class="nav-cta">
+      <a href="menu.html" class="btn btn-primary btn-sm">Order now</a>
+    </div>
+  </nav>
+</header>
+
+<main>
+  <div class="container">
+    <div class="checkout-wrapper">
+      <div class="form-card">
+        <h2>Delivery Details</h2>
+        <p style="color:var(--espresso-soft); font-size: 0.9rem;">No account needed. Just tell us where to drop it off.</p>
+        
+        <form id="checkout-form">
+          <div class="field">
+            <label for="name">Full Name</label>
+            <input type="text" id="name" placeholder="Your name" required>
+          </div>
+          <div class="field">
+            <label for="phone">Phone Number</label>
+            <input type="tel" id="phone" placeholder="e.g. 078 123 4567" required>
+          </div>
+          <div class="field">
+            <label for="address">Delivery Address</label>
+            <input type="text" id="address" placeholder="Street, Suburb, City" required>
+          </div>
+          <div class="field">
+            <label for="notes">Order Notes (Optional)</label>
+            <textarea id="notes" rows="3" placeholder="e.g. Please leave at the gate"></textarea>
+          </div>
+          
+          <button type="submit" class="btn btn-jam btn-block" style="margin-top: 10px;">Place Order</button>
+        </form>
+      </div>
+
+      <div class="order-summary">
+        <h3>Your Order</h3>
+        <div id="summary-items"></div>
+        
+        <div style="display: flex; justify-content: space-between; font-weight: 700; font-size: 1.2rem; margin-top: 16px;">
+          <span>Total</span>
+          <span id="summary-total">R0.00</span>
+        </div>
+        <p class="form-hint" style="margin-top: 10px;">Payment is collected on delivery or via EFT.</p>
+      </div>
+    </div>
+  </div>
+</main>
+
+<script>
+  // Pull cart data from local storage
+  const cart = JSON.parse(localStorage.getItem('cart')) || [];
+  const itemsContainer = document.getElementById('summary-items');
+  const totalContainer = document.getElementById('summary-total');
+
+  if (cart.length === 0) {
+    itemsContainer.innerHTML = '<p style="color:var(--espresso-soft);">Your cart is empty.</p>';
+    totalContainer.textContent = 'R0.00';
+  } else {
+    let total = 0;
+    cart.forEach(item => {
+      total += item.price * item.qty;
+      itemsContainer.innerHTML += `
+        <div class="order-line">
+          <span>${item.name} × ${item.qty}</span>
+          <span>R${item.price * item.qty}</span>
+        </div>
+      `;
+    });
+    totalContainer.textContent = 'R' + total.toFixed(2);
+  }
+
+  // Submit order
+  document.getElementById('checkout-form').addEventListener('submit', function(e) {
+    e.preventDefault();
+    // Clear the cart and show success
+    localStorage.removeItem('cart');
+    document.querySelector('.checkout-wrapper').innerHTML = `
+      <div class="card" style="text-align: center; padding: 50px; grid-column: 1 / -1;">
+        <h2>Order Placed Successfully! 🎉</h2>
+        <p style="color: var(--espresso-soft);">Thank you! Sikie will call you shortly to confirm your order.</p>
+        <a href="menu.html" class="btn btn-primary" style="margin-top: 20px;">Back to Menu</a>
+      </div>
+    `;
+  });
+</script>
+
+</body>
+</html>
