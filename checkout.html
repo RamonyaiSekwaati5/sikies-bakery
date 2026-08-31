@@ -41,7 +41,7 @@
       <div class="form-card">
         <h2>Delivery Details</h2>
         <p style="color:var(--espresso-soft); font-size: 0.9rem;">No account needed. Just tell us where to drop it off.</p>
-        
+
         <form id="checkout-form">
           <div class="field">
             <label for="name">Full Name</label>
@@ -59,7 +59,7 @@
             <label for="notes">Order Notes (Optional)</label>
             <textarea id="notes" rows="3" placeholder="e.g. Please leave at the gate"></textarea>
           </div>
-          
+
           <button type="submit" class="btn btn-jam btn-block" style="margin-top: 10px;">Place Order</button>
         </form>
       </div>
@@ -67,7 +67,7 @@
       <div class="order-summary">
         <h3>Your Order</h3>
         <div id="summary-items"></div>
-        
+
         <div style="display: flex; justify-content: space-between; font-weight: 700; font-size: 1.2rem; margin-top: 16px;">
           <span>Total</span>
           <span id="summary-total">R0.00</span>
@@ -78,53 +78,68 @@
   </div>
 </main>
 
-<!-- Load Supabase Library FIRST -->
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-
 <script>
-  // ONLY ONE supabase variable in this file!
-  const supabase = window.supabase.createClient(
-    'https://kxqdmrjftsanaqldje.supabase.co',
-    'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imt4cWRtcmlmanRzYW5hcWxqZGplIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODgxODQ3NTYsImV4cCI6MjEwMzc2MDc1Nn0.PLlVCN7TxSgPkOTllVdjj2Quv_bmpL6j88QOHHvTmn8'
-  );
+  // ---- Load cart (defensive: handles object-keyed cart, array cart, or missing/empty) ----
+  const rawCartString = localStorage.getItem('sikies_cart');
+  console.log('[checkout] raw sikies_cart from localStorage:', rawCartString);
 
-  // Cart logic
-  let cart = JSON.parse(localStorage.getItem('sikies_cart')) || [];
-  if (!Array.isArray(cart)) { cart = Object.values(cart); }
+  let cart = [];
+  if (rawCartString) {
+    try {
+      const parsed = JSON.parse(rawCartString);
+      cart = Array.isArray(parsed) ? parsed : Object.values(parsed);
+    } catch (e) {
+      console.error('[checkout] Failed to parse sikies_cart:', e);
+      cart = [];
+    }
+  }
+  console.log('[checkout] cart after normalization:', cart);
 
   const itemsContainer = document.getElementById('summary-items');
   const totalContainer = document.getElementById('summary-total');
 
-  if (cart.length === 0) {
-    itemsContainer.innerHTML = '<p style="color:var(--espresso-soft);">Your cart is empty. <a href="menu.html" style="color:var(--toasted); font-weight:700;">Go to menu</a></p>';
-    totalContainer.textContent = 'R0.00';
-  } else {
+  function renderSummary() {
+    if (cart.length === 0) {
+      itemsContainer.innerHTML = '<p style="color:var(--espresso-soft);">Your cart is empty. <a href="menu.html" style="color:var(--toasted); font-weight:700;">Go to menu</a></p>';
+      totalContainer.textContent = 'R0.00';
+      return 0;
+    }
+
     let total = 0;
+    let html = '';
     cart.forEach(item => {
-      total += item.price * item.qty;
-      itemsContainer.innerHTML += `<div class="order-line"><span>${item.name} × ${item.qty}</span><span>R${(item.price * item.qty).toFixed(2)}</span></div>`;
+      const price = Number(item.price) || 0;
+      const qty = Number(item.qty) || 0;
+      total += price * qty;
+      html += `<div class="order-line"><span>${item.name} × ${qty}</span><span>R${(price * qty).toFixed(2)}</span></div>`;
     });
+    itemsContainer.innerHTML = html;
     totalContainer.textContent = 'R' + total.toFixed(2);
+    return total;
   }
 
-  // Submit Order
+  renderSummary();
+
   document.getElementById('checkout-form').addEventListener('submit', async function(e) {
     e.preventDefault();
-    
+
+    if (cart.length === 0) {
+      alert('Your cart is empty. Please add items from the menu before checking out.');
+      return;
+    }
+
     const name = document.getElementById('name').value;
     const phone = document.getElementById('phone').value;
     const address = document.getElementById('address').value;
+
     let total = 0;
-    cart.forEach(item => { total += item.price * item.qty; });
+    cart.forEach(item => { total += (Number(item.price) || 0) * (Number(item.qty) || 0); });
 
-    const { error } = await supabase.from('orders').insert([
-      { customer_name: name, phone: phone, address: address, items: cart, total: total, status: 'New' }
-    ]);
-
-    if (error) {
-      alert("There was an error placing your order. Please check your console.");
-      return;
-    }
+    // Save the order locally (no database) so it can be viewed later if needed
+    const order = { customer_name: name, phone: phone, address: address, notes: document.getElementById('notes').value, items: cart, total: total, status: 'New', date: new Date().toISOString() };
+    const pastOrders = JSON.parse(localStorage.getItem('sikies_orders') || '[]');
+    pastOrders.push(order);
+    localStorage.setItem('sikies_orders', JSON.stringify(pastOrders));
 
     localStorage.removeItem('sikies_cart');
     document.querySelector('.checkout-wrapper').innerHTML = `
@@ -135,6 +150,5 @@
       </div>`;
   });
 </script>
-
 </body>
 </html>
