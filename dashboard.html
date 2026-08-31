@@ -6,7 +6,6 @@
 <title>Dashboard — Sikie's Homemade Bakery</title>
 <link rel="icon" href="images/logo.png">
 <link rel="stylesheet" href="css/style.css">
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script>
   if (!sessionStorage.getItem('isStaff')) { window.location.href = 'login.html'; }
 </script>
@@ -186,13 +185,8 @@
   </section>
 </main>
 
+<!-- NO CLOUD, NO CRASH. JUST LOCAL STORAGE. -->
 <script>
-  // ONLY ONE supabase variable in this file!
-  const supabase = window.supabase.createClient(
-    'https://kxqdmrjftsanaqldje.supabase.co',
-    'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imt4cWRtcmlmanRzYW5hcWxqZGplIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODgxODQ3NTYsImV4cCI6MjEwMzc2MDc1Nn0.PLlVCN7TxSgPkOTllVdjj2Quv_bmpL6j88QOHHvTmn8'
-  );
-
   function showToast(message) {
     let toast = document.querySelector('.toast');
     if (!toast) {
@@ -208,8 +202,8 @@
   }
   window.showToast = showToast;
 
-  // TABS
   document.addEventListener('DOMContentLoaded', function() {
+    // TABS WORK PERFECTLY
     const tabs = document.querySelectorAll('[data-dash-tab]');
     const panels = document.querySelectorAll('[data-dash-panel]');
     
@@ -226,6 +220,7 @@
       });
     });
 
+    // INVENTORY
     const inventory = [
       { name: 'Plain Scones (5L)', category: 'Scones', stock: 14, threshold: 5 },
       { name: 'Plain Scones (10L)', category: 'Scones', stock: 2, threshold: 5 },
@@ -255,53 +250,37 @@
       document.getElementById('alert-text').textContent = `Warning: You have ${lowStockCount} item(s) running low.`;
     }
 
-    loadOrders();
-  });
-
-  async function loadOrders() {
-    const { data: orders, error } = await supabase.from('orders').select('*').order('created_at', { ascending: false });
+    // LOAD CUSTOMER ORDERS FROM LOCAL STORAGE
+    const orders = JSON.parse(localStorage.getItem('sikies_orders')) || [];
     const ordersTbody = document.getElementById('orders-tbody');
     const totalOrdersEl = document.getElementById('total-orders');
-
-    if (error) { console.error(error); return; }
     totalOrdersEl.textContent = orders.length;
 
     if (orders.length === 0) {
-      ordersTbody.innerHTML = `<tr><td colspan="7" style="text-align: center; color: var(--espresso-soft); padding: 30px;">No orders yet.</td></tr>`;
-      return;
+      ordersTbody.innerHTML = `<tr><td colspan="7" style="text-align: center; color: var(--espresso-soft); padding: 30px;">No orders yet. Place an order on the menu!</td></tr>`;
+    } else {
+      ordersTbody.innerHTML = '';
+      orders.forEach(order => {
+        let itemsList = '';
+        let total = 0;
+        order.cart.forEach(item => {
+          itemsList += `${item.name} × ${item.qty}<br>`;
+          total += item.price * item.qty;
+        });
+
+        ordersTbody.innerHTML += `
+          <tr>
+            <td><strong>${order.name}</strong></td>
+            <td>${order.phone}</td>
+            <td>${order.address}</td>
+            <td>${itemsList}</td>
+            <td><strong>R${total.toFixed(2)}</strong></td>
+            <td><span class="status-pill status-preparing">New</span></td>
+            <td><button class="btn btn-primary btn-sm" onclick="this.closest('tr').querySelector('.status-pill').textContent='Baking'; this.disabled=true; this.textContent='Processing...';">Process</button></td>
+          </tr>`;
+      });
     }
-
-    ordersTbody.innerHTML = '';
-    orders.forEach(order => {
-      let itemsList = '';
-      if (Array.isArray(order.items)) { order.items.forEach(item => { itemsList += `${item.name} × ${item.qty}<br>`; }); }
-
-      ordersTbody.innerHTML += `
-        <tr>
-          <td><strong>${order.customer_name}</strong></td>
-          <td>${order.phone}</td>
-          <td>${order.address}</td>
-          <td>${itemsList}</td>
-          <td><strong>R${order.total.toFixed(2)}</strong></td>
-          <td><span class="status-pill status-preparing">${order.status || 'New'}</span></td>
-          <td><button class="btn btn-primary btn-sm" onclick="processOrder(this, '${order.id}')">Process</button></td>
-        </tr>`;
-    });
-  }
-
-  async function processOrder(button, orderId) {
-    const row = button.closest('tr');
-    const statusCell = row.querySelector('.status-pill');
-    statusCell.classList.remove('status-preparing');
-    statusCell.classList.add('status-baking');
-    statusCell.textContent = 'Baking';
-    button.disabled = true;
-    button.textContent = 'Processing...';
-
-    const { error } = await supabase.from('orders').update({ status: 'Baking' }).eq('id', orderId);
-    if (error) { console.error(error); }
-    showToast('Order moved to Baking status');
-  }
+  });
 
   document.getElementById('add-product-form').addEventListener('submit', function(e) {
     e.preventDefault();
