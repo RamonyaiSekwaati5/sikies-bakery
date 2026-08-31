@@ -1,6 +1,5 @@
 /* =========================================================
    Sikie's Homemade Bakery — Shared front-end interactivity
-   No backend / no database — all state lives in memory (JS)
    ========================================================= */
 
 /* ---------- Mobile nav ---------- */
@@ -28,7 +27,6 @@
     items.forEach(el => {
       el.classList.add('pre');
       io.observe(el);
-      // Safety net: if the observer never fires (e.g. odd layout), reveal anyway.
       setTimeout(() => el.classList.add('in'), 2500);
     });
   } catch(err){
@@ -53,21 +51,26 @@ function showToast(message){
 window.showToast = showToast;
 
 /* =========================================================
-   CART — in-memory only (no localStorage / backend)
-   Shared across the menu page via a simple module pattern.
+   CART
    ========================================================= */
 const BakeryCart = (function(){
-  let items = {}; // id -> {name, price, qty}
+  let items = JSON.parse(localStorage.getItem('sikies_cart')) || {}; 
+
+  function save(){
+    localStorage.setItem('sikies_cart', JSON.stringify(items));
+  }
 
   function add(id, name, price){
     if(!items[id]) items[id] = { name, price, qty: 0 };
     items[id].qty += 1;
+    save();
     render();
   }
   function remove(id){
     if(!items[id]) return;
     items[id].qty -= 1;
     if(items[id].qty <= 0) delete items[id];
+    save();
     render();
   }
   function count(){
@@ -147,20 +150,20 @@ window.BakeryCart = BakeryCart;
         showToast('Your basket is empty');
         return;
       }
-      showToast('Demo order placed — thank you! 🍞');
-      close();
+      localStorage.setItem('sikies_cart', JSON.stringify(BakeryCart.items()));
+      window.location.href = 'checkout.html';
     });
   }
 })();
 
 /* =========================================================
-   LOGIN — demo-only credential check, in-memory
+   LOGIN
    ========================================================= */
 (function initLogin(){
   const form = document.querySelector('#login-form');
   if(!form) return;
 
-  const DEMO_USER = { email: 'demo@sikies.co.za', password: 'bakery123' };
+  const DEMO_USER = { email: 'sikie-admin', password: 'staff2026' }; 
 
   form.addEventListener('submit', (e) => {
     e.preventDefault();
@@ -169,17 +172,9 @@ window.BakeryCart = BakeryCart;
     const errorBox = document.querySelector('#login-error');
     const btn = form.querySelector('button[type="submit"]');
 
-    let valid = true;
-    [email, password].forEach(input => {
-      const field = input.closest('.field');
-      if(!input.value.trim()){
-        field.classList.add('invalid');
-        valid = false;
-      } else {
-        field.classList.remove('invalid');
-      }
-    });
-    if(!valid) return;
+    if(!email.value.trim() || !password.value.trim()){
+      return;
+    }
 
     btn.disabled = true;
     const originalText = btn.textContent;
@@ -188,6 +183,7 @@ window.BakeryCart = BakeryCart;
 
     setTimeout(() => {
       if(email.value.trim().toLowerCase() === DEMO_USER.email && password.value === DEMO_USER.password){
+        sessionStorage.setItem('isStaff', 'true');
         btn.textContent = 'Success — redirecting…';
         setTimeout(() => { window.location.href = 'dashboard.html'; }, 500);
       } else {
@@ -197,19 +193,10 @@ window.BakeryCart = BakeryCart;
       }
     }, 700);
   });
-
-  const fillDemo = document.querySelector('#fill-demo');
-  if(fillDemo){
-    fillDemo.addEventListener('click', () => {
-      form.querySelector('#login-email').value = DEMO_USER.email;
-      form.querySelector('#login-password').value = DEMO_USER.password;
-      showToast('Demo credentials filled in');
-    });
-  }
 })();
 
 /* =========================================================
-   CONTACT FORM — front-end only validation + confirmation
+   CONTACT FORM
    ========================================================= */
 (function initContactForm(){
   const form = document.querySelector('#contact-form');
@@ -217,22 +204,6 @@ window.BakeryCart = BakeryCart;
 
   form.addEventListener('submit', (e) => {
     e.preventDefault();
-    let valid = true;
-    const requiredFields = form.querySelectorAll('[data-required]');
-    requiredFields.forEach(input => {
-      const field = input.closest('.field');
-      const isEmail = input.type === 'email';
-      const filled = input.value.trim().length > 0;
-      const emailOk = !isEmail || /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(input.value.trim());
-      if(!filled || !emailOk){
-        field.classList.add('invalid');
-        valid = false;
-      } else {
-        field.classList.remove('invalid');
-      }
-    });
-    if(!valid) return;
-
     const btn = form.querySelector('button[type="submit"]');
     const original = btn.textContent;
     btn.disabled = true;
@@ -248,53 +219,7 @@ window.BakeryCart = BakeryCart;
 })();
 
 /* =========================================================
-   DASHBOARD — demo order status interactivity
-   ========================================================= */
-(function initDashboard(){
-  const buttons = document.querySelectorAll('[data-advance-order]');
-  if(!buttons.length) return;
-
-  const stages = ['preparing', 'baking', 'ready', 'delivered'];
-  const labels = { preparing: 'Preparing', baking: 'Baking', ready: 'Ready for pickup', delivered: 'Delivered' };
-  const widths = { preparing: '25%', baking: '55%', ready: '85%', delivered: '100%' };
-
-  buttons.forEach(btn => {
-    btn.addEventListener('click', () => {
-      const row = btn.closest('tr');
-      const pill = row.querySelector('.status-pill');
-      const fill = row.querySelector('.progress-fill');
-      let current = stages.findIndex(s => pill.classList.contains(`status-${s}`));
-      if(current < stages.length - 1){
-        pill.classList.remove(`status-${stages[current]}`);
-        current += 1;
-        pill.classList.add(`status-${stages[current]}`);
-        pill.textContent = labels[stages[current]];
-        if(fill) fill.style.width = widths[stages[current]];
-        showToast(`Order updated to “${labels[stages[current]]}”`);
-      }
-      if(current === stages.length - 1){
-        btn.disabled = true;
-        btn.textContent = 'Completed';
-      }
-    });
-  });
-
-  /* Sidebar tab switching (demo sections) */
-  const tabs = document.querySelectorAll('[data-dash-tab]');
-  const panels = document.querySelectorAll('[data-dash-panel]');
-  tabs.forEach(tab => {
-    tab.addEventListener('click', (e) => {
-      e.preventDefault();
-      tabs.forEach(t => t.classList.remove('active'));
-      tab.classList.add('active');
-      const target = tab.dataset.dashTab;
-      panels.forEach(p => p.style.display = (p.dataset.dashPanel === target) ? 'block' : 'none');
-    });
-  });
-})();
-
-/* =========================================================
-   MENU FILTER — category pills
+   MENU FILTER
    ========================================================= */
 (function initMenuFilter(){
   const pills = document.querySelectorAll('[data-filter]');
@@ -314,7 +239,7 @@ window.BakeryCart = BakeryCart;
   });
 })();
 
-/* ---------- Newsletter (footer) demo ---------- */
+/* ---------- Newsletter ---------- */
 (function initNewsletter(){
   const form = document.querySelector('#newsletter-form');
   if(!form) return;
@@ -327,7 +252,7 @@ window.BakeryCart = BakeryCart;
   });
 })();
 
-/* ---------- Set active nav link based on current page ---------- */
+/* ---------- Set active nav link ---------- */
 (function markActiveNav(){
   const path = window.location.pathname.split('/').pop() || 'index.html';
   document.querySelectorAll('.nav-links a').forEach(a => {
