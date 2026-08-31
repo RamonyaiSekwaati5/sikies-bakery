@@ -3,32 +3,14 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Staff Login — Sikie's Homemade Bakery</title>
+<title>Checkout — Sikie's Homemade Bakery</title>
 <link rel="icon" href="images/logo.png">
 <link rel="stylesheet" href="css/style.css">
 <style>
-  .auth-wrapper {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    min-height: calc(100vh - 200px);
-    padding: 40px 20px;
-  }
-  .auth-card {
-    width: 100%;
-    max-width: 420px;
-    background: var(--paper);
-    border-radius: var(--radius-l);
-    border: 1px solid var(--line);
-    box-shadow: var(--shadow-lift);
-    padding: 40px;
-  }
-  .auth-card .eyebrow { justify-content: center; display: flex; margin-bottom: 8px; }
-  .auth-card h1 { text-align: center; margin-bottom: 8px; }
-  .auth-card p { text-align: center; color: var(--espresso-soft); font-size: 0.9rem; margin-bottom: 30px; }
-  .error-msg { background: #fdecea; color: var(--jam); border: 1px solid #f5c6cb; padding: 10px 14px; border-radius: 10px; font-size: 0.85rem; font-weight: 600; margin-bottom: 20px; display: none; }
-  .demo-note { background: var(--cream-dim); border: 1px dashed var(--toasted); border-radius: 12px; padding: 12px 16px; font-size: 0.82rem; color: var(--espresso-soft); margin-top: 22px; display: flex; gap: 10px; align-items: flex-start; }
-  .demo-note svg { width: 18px; height: 18px; flex-shrink: 0; margin-top: 1px; color: var(--toasted-deep); }
+  .checkout-wrapper { max-width: 900px; margin: 40px auto; display: grid; grid-template-columns: 1fr 1fr; gap: 30px; }
+  @media (max-width: 768px) { .checkout-wrapper { grid-template-columns: 1fr; } }
+  .order-summary { background: var(--paper); border: 1px solid var(--line); border-radius: var(--radius-m); padding: 24px; height: fit-content; }
+  .order-line { display: flex; justify-content: space-between; padding: 10px 0; border-bottom: 1px dashed var(--line); font-size: 0.9rem; }
 </style>
 </head>
 <body>
@@ -54,49 +36,103 @@
 </header>
 
 <main>
-  <div class="auth-wrapper">
-    <div class="auth-card">
-      <span class="eyebrow">staff only</span>
-      <h1>Admin Login</h1>
-      <p>Enter your staff access code to manage orders.</p>
-      
-      <div class="error-msg" id="login-error">Invalid access code. Please try again.</div>
+  <div class="container">
+    <div class="checkout-wrapper">
+      <div class="form-card">
+        <h2>Delivery Details</h2>
+        <p style="color:var(--espresso-soft); font-size: 0.9rem;">No account needed. Just tell us where to drop it off.</p>
+        
+        <form id="checkout-form">
+          <div class="field">
+            <label for="name">Full Name</label>
+            <input type="text" id="name" placeholder="Your name" required>
+          </div>
+          <div class="field">
+            <label for="phone">Phone Number</label>
+            <input type="tel" id="phone" placeholder="e.g. 078 123 4567" required>
+          </div>
+          <div class="field">
+            <label for="address">Delivery Address</label>
+            <input type="text" id="address" placeholder="Street, Suburb, City" required>
+          </div>
+          <div class="field">
+            <label for="notes">Order Notes (Optional)</label>
+            <textarea id="notes" rows="3" placeholder="e.g. Please leave at the gate"></textarea>
+          </div>
+          
+          <button type="submit" class="btn btn-jam btn-block" style="margin-top: 10px;">Place Order</button>
+        </form>
+      </div>
 
-      <form id="login-form">
-        <div class="field">
-          <label for="login-email">Access Code</label>
-          <input type="password" id="login-email" placeholder="Enter staff code" required>
+      <div class="order-summary">
+        <h3>Your Order</h3>
+        <div id="summary-items"></div>
+        
+        <div style="display: flex; justify-content: space-between; font-weight: 700; font-size: 1.2rem; margin-top: 16px;">
+          <span>Total</span>
+          <span id="summary-total">R0.00</span>
         </div>
-        <div class="field">
-          <label for="login-password">Password</label>
-          <input type="password" id="login-password" placeholder="Enter staff password" required>
-        </div>
-        <button type="submit" class="btn btn-primary btn-block" style="margin-top: 10px;">Log in to Dashboard</button>
-      </form>
-
-      <div class="demo-note">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4M12 8h.01"/></svg>
-        <span><strong>Demo codes:</strong> Use "sikie-admin" as code and "staff2026" as password.</span>
+        <p class="form-hint" style="margin-top: 10px;">Payment is collected on delivery or via EFT.</p>
       </div>
     </div>
   </div>
 </main>
 
+<!-- Load Supabase Library FIRST -->
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
 <script>
-  const DEMO_USER = { email: 'sikie-admin', password: 'staff2026' }; 
+  // ONLY ONE supabase variable in this file!
+  const supabase = window.supabase.createClient(
+    'https://kxqdmrjftsanaqldje.supabase.co',
+    'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imt4cWRtcmlmanRzYW5hcWxqZGplIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODgxODQ3NTYsImV4cCI6MjEwMzc2MDc1Nn0.PLlVCN7TxSgPkOTllVdjj2Quv_bmpL6j88QOHHvTmn8'
+  );
 
-  document.getElementById('login-form').addEventListener('submit', (e) => {
+  // Cart logic
+  let cart = JSON.parse(localStorage.getItem('sikies_cart')) || [];
+  if (!Array.isArray(cart)) { cart = Object.values(cart); }
+
+  const itemsContainer = document.getElementById('summary-items');
+  const totalContainer = document.getElementById('summary-total');
+
+  if (cart.length === 0) {
+    itemsContainer.innerHTML = '<p style="color:var(--espresso-soft);">Your cart is empty. <a href="menu.html" style="color:var(--toasted); font-weight:700;">Go to menu</a></p>';
+    totalContainer.textContent = 'R0.00';
+  } else {
+    let total = 0;
+    cart.forEach(item => {
+      total += item.price * item.qty;
+      itemsContainer.innerHTML += `<div class="order-line"><span>${item.name} × ${item.qty}</span><span>R${(item.price * item.qty).toFixed(2)}</span></div>`;
+    });
+    totalContainer.textContent = 'R' + total.toFixed(2);
+  }
+
+  // Submit Order
+  document.getElementById('checkout-form').addEventListener('submit', async function(e) {
     e.preventDefault();
-    const email = document.getElementById('login-email');
-    const password = document.getElementById('login-password');
-    const errorBox = document.getElementById('login-error');
+    
+    const name = document.getElementById('name').value;
+    const phone = document.getElementById('phone').value;
+    const address = document.getElementById('address').value;
+    let total = 0;
+    cart.forEach(item => { total += item.price * item.qty; });
 
-    if(email.value.trim().toLowerCase() === DEMO_USER.email && password.value === DEMO_USER.password){
-      sessionStorage.setItem('isStaff', 'true');
-      window.location.href = 'dashboard.html';
-    } else {
-      errorBox.style.display = 'flex';
+    const { error } = await supabase.from('orders').insert([
+      { customer_name: name, phone: phone, address: address, items: cart, total: total, status: 'New' }
+    ]);
+
+    if (error) {
+      alert("There was an error placing your order. Please check your console.");
+      return;
     }
+
+    localStorage.removeItem('sikies_cart');
+    document.querySelector('.checkout-wrapper').innerHTML = `
+      <div class="card" style="text-align: center; padding: 50px; grid-column: 1 / -1;">
+        <h2>Order Placed Successfully! 🎉</h2>
+        <p style="color: var(--espresso-soft);">Thank you ${name}! Sikie will call you shortly to confirm your order.</p>
+        <a href="menu.html" class="btn btn-primary" style="margin-top: 20px;">Back to Menu</a>
+      </div>`;
   });
 </script>
 
