@@ -7,7 +7,6 @@
 <link rel="icon" href="images/logo.png">
 <link rel="stylesheet" href="css/style.css">
 <style>
-  /* Menu Specific Styles */
   .menu-item-img {
     width: 80px;
     height: 80px;
@@ -16,6 +15,18 @@
     flex-shrink: 0;
     border: 3px solid var(--cream-dim);
     background: var(--paper);
+  }
+  .menu-item-emoji {
+    width: 80px;
+    height: 80px;
+    border-radius: 50%;
+    flex-shrink: 0;
+    background: var(--cream-dim);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 2rem;
+    border: 3px solid var(--cream-dim);
   }
   .menu-item {
     display: flex;
@@ -31,9 +42,7 @@
     border-color: var(--toasted);
     box-shadow: var(--shadow-lift);
   }
-  .menu-item-body {
-    flex: 1;
-  }
+  .menu-item-body { flex: 1; }
   .menu-item-top {
     display: flex;
     justify-content: space-between;
@@ -41,20 +50,9 @@
     flex-wrap: wrap;
     gap: 8px;
   }
-  .menu-item-top h4 {
-    margin: 0;
-    font-size: 1.05rem;
-  }
-  .menu-item-price {
-    font-weight: 700;
-    color: var(--jam);
-    font-family: var(--font-display);
-  }
-  .menu-item p {
-    margin: 4px 0 8px;
-    font-size: 0.85rem;
-    color: var(--espresso-soft);
-  }
+  .menu-item-top h4 { margin: 0; font-size: 1.05rem; }
+  .menu-item-price { font-weight: 700; color: var(--jam); font-family: var(--font-display); }
+  .menu-item p { margin: 4px 0 8px; font-size: 0.85rem; color: var(--espresso-soft); }
   .menu-item-foot {
     display: flex;
     justify-content: space-between;
@@ -90,32 +88,13 @@
     transition: all 0.2s;
     color: var(--espresso);
   }
-  .pill:hover {
-    background: var(--cream-dim);
-  }
-  .pill.active {
-    background: var(--toasted);
-    border-color: var(--toasted);
-    color: white;
-  }
-  .section-tight {
-    padding: 40px 20px;
-    max-width: 1180px;
-    margin: 0 auto;
-  }
-  .grid-2 {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 16px;
-  }
+  .pill:hover { background: var(--cream-dim); }
+  .pill.active { background: var(--toasted); border-color: var(--toasted); color: white; }
+  .section-tight { padding: 40px 20px; max-width: 1180px; margin: 0 auto; }
+  .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
   @media (max-width: 680px) {
-    .grid-2 {
-      grid-template-columns: 1fr;
-    }
-    .menu-item-img {
-      width: 60px;
-      height: 60px;
-    }
+    .grid-2 { grid-template-columns: 1fr; }
+    .menu-item-img, .menu-item-emoji { width: 60px; height: 60px; }
   }
 </style>
 </head>
@@ -155,10 +134,10 @@
       <button class="pill" data-filter="Muffins">Muffins</button>
       <button class="pill" data-filter="Cakes">Cakes</button>
       <button class="pill" data-filter="Lunch Box Cakes">Lunch Box Cakes</button>
+      <button class="pill" data-filter="Custom">Custom</button>
     </div>
 
     <div class="grid-2">
-
       <!-- Scones -->
       <div class="menu-item" data-category="Scones">
         <img src="images/plain-scones-5l - Copy.jpeg" alt="Plain Scones 5L" class="menu-item-img">
@@ -179,7 +158,7 @@
           <p>Light and fluffy, baked fresh every morning.</p>
           <div class="menu-item-foot">
             <span class="badge">Scones</span>
-            <button class="btn btn-primary btn-sm" data-add data-id="Plain 10L" data-name="Plain Scones 10L" data-price="55">Add · R55</button>
+            <button class="btn btn-primary btn-sm" data-add data-id="Plain 10L" data-name="Plain Scones 10L" data-price="550">Add · R550</button>
           </div>
         </div>
       </div>
@@ -223,9 +202,9 @@
       </div>
 
       <div class="menu-item" data-category="Cakes">
-        <img src="images/jam-tarts.jpeg" alt="jam tarts" class="menu-item-img">
+        <div class="menu-item-emoji">🎂</div>
         <div class="menu-item-body">
-          <div class="menu-item-top"><h4>jam-tarts</h4><span class="menu-item-price">From R80</span></div>
+          <div class="menu-item-top"><h4>Biscoff &amp; Red Velvet Cake</h4><span class="menu-item-price">From R80</span></div>
           <p>Designed with your flavours, colours, and toppers included.</p>
           <div class="menu-item-foot">
             <span class="badge">Cakes</span>
@@ -270,7 +249,6 @@
           </div>
         </div>
       </div>
-
     </div>
   </section>
 
@@ -346,6 +324,50 @@
   </div>
 </aside>
 
+<!-- New Script to Load Dashboard Products onto Menu -->
+<script>
+  // 1. Load custom products added from dashboard
+  const customProducts = JSON.parse(localStorage.getItem('sikies_products')) || [];
+  
+  if (customProducts.length > 0) {
+    const menuGrid = document.querySelector('.grid-2');
+    
+    customProducts.forEach(product => {
+      const productCard = `
+        <div class="menu-item" data-category="${product.category}">
+          <img src="${product.image || 'images/logo.png'}" alt="${product.name}" class="menu-item-img">
+          <div class="menu-item-body">
+            <div class="menu-item-top">
+              <h4>${product.name}</h4>
+              <span class="menu-item-price">R${product.price.toFixed(2)}</span>
+            </div>
+            <p>${product.description}</p>
+            <div class="menu-item-foot">
+              <span class="badge">${product.category}</span>
+              <button class="btn btn-primary btn-sm" data-add data-id="${Date.now()}" data-name="${product.name}" data-price="${product.price}">Add · R${product.price.toFixed(2)}</button>
+            </div>
+          </div>
+        </div>
+      `;
+      menuGrid.innerHTML += productCard;
+    });
+    
+    // 2. Re-initialize menu buttons so they work on new products
+    // SAFE WAY: Directly attach event listeners to the new buttons
+    document.querySelectorAll('[data-add]').forEach(btn => {
+      if(btn.dataset.bound) return; // Prevent double-binding
+      btn.dataset.bound = 'true';
+      btn.addEventListener('click', () => {
+        const { id, name, price } = btn.dataset;
+        window.BakeryCart.add(id, name, parseFloat(price));
+        window.showToast(`Added ${name} to your basket`);
+      });
+    });
+  }
+</script>
+
+<!-- Load the main script -->
 <script src="js/script.js"></script>
+
 </body>
 </html>
