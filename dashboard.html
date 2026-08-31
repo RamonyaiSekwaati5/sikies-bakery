@@ -187,6 +187,7 @@
 </main>
 
 <script>
+  // ONLY ONE supabase variable in this file!
   const supabase = window.supabase.createClient(
     'https://kxqdmrjftsanaqldje.supabase.co',
     'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imt4cWRtcmlmanRzYW5hcWxqZGplIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODgxODQ3NTYsImV4cCI6MjEwMzc2MDc1Nn0.PLlVCN7TxSgPkOTllVdjj2Quv_bmpL6j88QOHHvTmn8'
@@ -207,6 +208,7 @@
   }
   window.showToast = showToast;
 
+  // TABS
   document.addEventListener('DOMContentLoaded', function() {
     const tabs = document.querySelectorAll('[data-dash-tab]');
     const panels = document.querySelectorAll('[data-dash-panel]');
